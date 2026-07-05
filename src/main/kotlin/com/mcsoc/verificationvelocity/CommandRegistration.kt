@@ -14,7 +14,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 
 object CommandRegistration {
     @JvmStatic
-    fun registerCommands(proxy: ProxyServer, plugin: VerificationPlugin) {
+    fun registerCommands(plugin: VerificationPlugin, proxy: ProxyServer) {
         val manager = proxy.commandManager
         val debug_command = this.registerDebugCommand(proxy)
         val meta = manager.metaBuilder(debug_command)
