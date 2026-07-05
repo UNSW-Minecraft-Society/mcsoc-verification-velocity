@@ -8,8 +8,8 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 
-import com.mcsoc.verificationvelocity.CommandRegistration;
-import com.mcsoc.verificationvelocity.OnPlayerJoinEvent;
+import com.mcsoc.verificationvelocity.eventhandlers.CommandRegistration;
+import com.mcsoc.verificationvelocity.eventhandlers.OnPlayerJoinEvent;
 
 @Plugin(
     id = VerificationPlugin.MODID, 
