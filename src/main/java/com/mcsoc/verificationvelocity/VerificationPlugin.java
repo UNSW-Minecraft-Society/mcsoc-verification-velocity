@@ -36,6 +36,7 @@ public class VerificationPlugin {
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
-        CommandRegistration.registerCommands(server, this);
+        server.getEventManager().register(this, new OnPlayerJoinEvent());
+        CommandRegistration.registerCommands(this, server);
     }
 }
