@@ -9,7 +9,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 
 import com.mcsoc.verificationvelocity.CommandRegistration;
-
+import com.mcsoc.verificationvelocity.OnPlayerJoinEvent;
 
 @Plugin(
     id = VerificationPlugin.MODID, 
@@ -22,9 +22,9 @@ import com.mcsoc.verificationvelocity.CommandRegistration;
 public class VerificationPlugin {
     
     public static final String MODID = "mcsoc-verification";
+    public final Logger logger;
 
     private final ProxyServer server;
-    private final Logger logger;
 
     @Inject
     public VerificationPlugin(ProxyServer server, Logger logger) {
@@ -36,7 +36,7 @@ public class VerificationPlugin {
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
-        server.getEventManager().register(this, new OnPlayerJoinEvent());
+        server.getEventManager().register(this, new OnPlayerJoinEvent(logger));
         CommandRegistration.registerCommands(this, server);
     }
 }
