@@ -1,4 +1,4 @@
-package com.mcsoc.verificationvelocity
+package com.mcsoc.verificationvelocity.eventhandlers
 
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
@@ -10,6 +10,8 @@ import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.proxy.ProxyServer
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+
+import com.mcsoc.verificationvelocity.VerificationPlugin
 
 
 object CommandRegistration {
