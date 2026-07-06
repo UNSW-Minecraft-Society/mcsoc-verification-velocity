@@ -21,9 +21,12 @@ class OnPlayerJoinEvent(val logger: Logger) {
     fun event(ctx: ServerPreConnectEvent) {
         val joiner = ctx.player
         
-        if (FirebaseReader.checkIfPlayerIsWhitelisted(joiner, logger)) joiner.disconnect(Component.text("failed successfully")) // return
-        
-        ctx.result = ServerPreConnectEvent.ServerResult.denied()
-        joiner.disconnect(DISCONNECT_MESSAGE)
+        if (FirebaseReader.checkIfPlayerIsWhitelisted(joiner, logger)) {
+            joiner.disconnect(Component.text("failed successfully"))
+            return
+        } else {
+            ctx.result = ServerPreConnectEvent.ServerResult.denied()
+            joiner.disconnect(DISCONNECT_MESSAGE)
+        }
     }
 }

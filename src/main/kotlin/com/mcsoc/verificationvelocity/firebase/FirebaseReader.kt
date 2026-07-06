@@ -1,8 +1,7 @@
 package com.mcsoc.verificationvelocity.firebase
 
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.mcsoc.verificationvelocity.dataloader.PluginDataLoader
 import com.velocitypowered.api.proxy.Player
 import org.slf4j.Logger
 import java.net.URI
@@ -12,15 +11,17 @@ import java.net.http.HttpResponse
 
 
 val findUser_endpoint_url = URI.create("https://finduser-l7edgf7twa-an.a.run.app")
-// TODO MAKE THIS NOT BE IN THE CODE IF POSSIBLE??
-const val api_key = "Bearer 8dKY69GCNQdQdwYHeYHc4g4PG6CDpZuAmS5rGmpTB666Rt7uFFbSV5wcwRQj"
 
 object FirebaseReader {
     fun checkIfPlayerIsWhitelisted(player: Player, logger: Logger): Boolean {
         val username = player.gameProfile.name
-        val firebase = getNondescriptResponse(username)
-        val res = JsonParser.parseString(firebase.body()).asJsonObject
-        for (entry in res.get("results").asJsonArray) {
+        val find_user_res = getFindUserResponse(username)
+        if (find_user_res.body() == "Unauthorized") {
+            logger.error("Unable to authorise with Firebase! Check that the API Key in config.json is valid.")
+            return false
+        }
+        val res_json = JsonParser.parseString(find_user_res.body()).asJsonObject
+        for (entry in res_json.get("results").asJsonArray) {
             val is_verified = entry?.asJsonObject?.get("is_verified")?.asBoolean ?: continue
             if (is_verified) return true
         }
@@ -28,7 +29,8 @@ object FirebaseReader {
         return false
     }
     
-    fun getNondescriptResponse(name: String): HttpResponse<String> {
+    fun getFindUserResponse(name: String): HttpResponse<String> {
+        val api_key = PluginDataLoader.getApiKey()
         val http_client = HttpClient.newBuilder().build()
         val request = HttpRequest.newBuilder()
             .uri(findUser_endpoint_url)
