@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.ProxyServer
 
 import com.mcsoc.verificationvelocity.VerificationPlugin
 import com.mcsoc.verificationvelocity.dataloader.PluginDataLoader
+import com.velocitypowered.api.command.CommandManager
 
 
 object CommandRegistration {
@@ -34,15 +35,21 @@ object CommandRegistration {
         return BrigadierCommand(rootNode)
     }
     
+    
+    private fun registerCommand(plugin: VerificationPlugin, proxy: ProxyServer, command: BrigadierCommand) {
+        val manager = proxy.commandManager
+        val meta = manager.metaBuilder(command)
+            // .aliases()
+            .plugin(plugin)
+            .build()
+        manager.register(meta, command)
+    }
+    
     @JvmStatic
     fun registerCommands(plugin: VerificationPlugin, proxy: ProxyServer) {
         val manager = proxy.commandManager
         
-        val debug_command = this.constructDebugCommand(proxy)
-        val debug_meta = manager.metaBuilder(debug_command)
-            // .aliases()
-            .plugin(plugin)
-            .build()
-        manager.register(debug_meta, debug_command)
+        // registerCommand(plugin, proxy, this.constructDebugCommand(proxy))
+        registerCommand(plugin, proxy, this.constructReloadConfigCommand(proxy))
     }
 }
