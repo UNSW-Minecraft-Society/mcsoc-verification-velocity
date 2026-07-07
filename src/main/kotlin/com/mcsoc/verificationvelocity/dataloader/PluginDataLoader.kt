@@ -29,6 +29,8 @@ object PluginDataLoader : ConfigFileLoader {
     fun loadDataFromFiles() {
         val config_path = data_directory.resolve(CONFIG_DATA_FILE_PATH)
         config = this.loadConfigData(config_path)
+        
+        this.saveDataToFiles()
     }
     
     @JvmStatic
