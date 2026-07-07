@@ -13,25 +13,35 @@ import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 import java.nio.file.Path
 
-internal data class ConfigData(val api_key: String) {
+internal data class ConfigData(
+    val api_key: String,
+    val server_names: List<String>
+) {
     companion object {
         fun getDefault(): ConfigData {
-            return ConfigData("fake123")
+            return ConfigData("fakekey123", listOf("server1", "server2"))
         }
         
         const val API_KEY_JSON_KEY = "api_key"
+        const val SERVER_NAMES_JSON_KEY = "server_names"
         
         fun fromJson(json: JsonElement?): ConfigData {
-            val json_object = json?.asJsonObject ?: return ConfigData.getDefault() 
-            val api_key = json_object.get(API_KEY_JSON_KEY).asString ?: return ConfigData.getDefault()
-            return ConfigData(api_key)
+            val default = ConfigData.getDefault()
+            return json?.asJsonObject?.let{json_object ->
+                val api_key = json_object.get(API_KEY_JSON_KEY)?.asString ?: default.api_key
+                val names_list = json_object.get(SERVER_NAMES_JSON_KEY)?.asJsonArray?.map{it.asString} ?: default.server_names
+                ConfigData(api_key, names_list)
+            } ?: default
         }
     }
     
     fun toJson(): JsonObject {
-        val json = JsonObject()
-        json.addProperty(API_KEY_JSON_KEY, this.api_key)
-        return json
+        return JsonObject().apply{
+            addProperty(API_KEY_JSON_KEY, api_key)
+            add(SERVER_NAMES_JSON_KEY, JsonArray().apply{
+                server_names.forEach(::add)
+            })
+        }
     }
     
     class JsonSerialiser : JsonSerializer<ConfigData>, JsonDeserializer<ConfigData> {
