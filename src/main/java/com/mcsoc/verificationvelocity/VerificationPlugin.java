@@ -21,7 +21,7 @@ import com.mcsoc.verificationvelocity.eventhandlers.OnPlayerJoinEvent;
 @Plugin(
     id = VerificationPlugin.MODID, 
     name = "MCSoc Verification Plugin - Velocity", 
-    version = "0.0.1",
+    version = "0.1.2",
     url = "https://mc.unswminecraft.com", 
     description = "A velocity plugin to interface with UNSW Minecraft Society's Firebase verification system.", 
     authors = {"veveddo"}
@@ -47,7 +47,7 @@ public class VerificationPlugin {
     public void onProxyInitialize(ProxyInitializeEvent event) {
         PluginDataLoader.setDataDirectory(data_directory);
         PluginDataLoader.loadDataFromFiles();
-        
+
         server.getEventManager().register(this, new OnPlayerJoinEvent(logger));
         CommandRegistration.registerCommands(this, server);
     }
