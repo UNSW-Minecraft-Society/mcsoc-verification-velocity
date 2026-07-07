@@ -2,6 +2,12 @@ package com.mcsoc.verificationvelocity.dataloader
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
 
 import java.io.File
@@ -15,7 +21,15 @@ import kotlin.collections.HashMap
 import kotlin.collections.Map
 
 
-internal interface JsonFileLoader <D> {
+internal interface LoadedFileData: JsonSerializer<LoadedFileData>, JsonDeserializer<LoadedFileData> {
+    fun toJson(): JsonObject
+
+    override fun serialize(src: LoadedFileData?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
+        return src?.toJson()
+    }
+}
+
+internal interface JsonFileLoader <D : LoadedFileData> {
     fun getGsonParser(): Gson
     
     fun getFileDataType(): Type

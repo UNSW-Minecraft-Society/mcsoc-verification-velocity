@@ -13,12 +13,13 @@ import java.lang.reflect.Type
 import java.nio.file.Path
 
 import com.mcsoc.verificationvelocity.dataloader.JsonFileLoader
+import com.mcsoc.verificationvelocity.dataloader.LoadedFileData
 
 
 internal data class MessageConfigData(
     val form_link: String,
     val discord_link: String
-) {
+) : LoadedFileData {
     companion object {
         fun getDefault(): MessageConfigData {
             return MessageConfigData("forms.gle.fake123", "discord.gg/yunkudas")
@@ -37,27 +38,22 @@ internal data class MessageConfigData(
         }
     }
     
-    fun toJson(): JsonObject {
+    override fun toJson(): JsonObject {
         return JsonObject().apply{
             addProperty(FORM_LINK_JSON_KEY, form_link)
             addProperty(DISCORD_LINK_JSON_KEY, discord_link)
         }
     }
     
-    class JsonSerialiser : JsonSerializer<MessageConfigData>, JsonDeserializer<MessageConfigData> {
-            override fun serialize(src: MessageConfigData?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
-                return src?.toJson()
-            }
-            override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): MessageConfigData {
-                return MessageConfigData.fromJson(json)
-            }
-        }
+    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): MessageConfigData {
+        return MessageConfigData.fromJson(json)
+    }
 }
 
 internal interface MessageConfigFileLoader : JsonFileLoader<MessageConfigData> {
     companion object {
         fun registerGsonTypes(builder: GsonBuilder): GsonBuilder {
-            builder.registerTypeAdapter(MessageConfigData::class.java, MessageConfigData.JsonSerialiser())
+            builder.registerTypeAdapter(MessageConfigData::class.java, MessageConfigData.getDefault())
             return builder
         }
     }

@@ -13,12 +13,13 @@ import java.lang.reflect.Type
 import java.nio.file.Path
 
 import com.mcsoc.verificationvelocity.dataloader.JsonFileLoader
+import com.mcsoc.verificationvelocity.dataloader.LoadedFileData
 
 
 internal data class WhitelistConfigData(
     val api_key: String,
     val server_names: List<String>
-) {
+) : LoadedFileData {
     companion object {
         fun getDefault(): WhitelistConfigData {
             return WhitelistConfigData("fakekey123", listOf("server1", "server2"))
@@ -26,8 +27,6 @@ internal data class WhitelistConfigData(
         
         const val API_KEY_JSON_KEY = "api_key"
         const val SERVER_NAMES_JSON_KEY = "server_names"
-        const val FORM_LINK_JSON_KEY = "form_url"
-        const val DISCORD_LINK_JSON_KEY = "discord_invite"
         
         fun fromJson(json: JsonElement?): WhitelistConfigData {
             val default = WhitelistConfigData.getDefault()
@@ -39,7 +38,7 @@ internal data class WhitelistConfigData(
         }
     }
     
-    fun toJson(): JsonObject {
+    override fun toJson(): JsonObject {
         return JsonObject().apply{
             addProperty(API_KEY_JSON_KEY, api_key)
             add(SERVER_NAMES_JSON_KEY, JsonArray().apply{
@@ -47,21 +46,16 @@ internal data class WhitelistConfigData(
             })
         }
     }
-    
-    class JsonSerialiser : JsonSerializer<WhitelistConfigData>, JsonDeserializer<WhitelistConfigData> {
-            override fun serialize(src: WhitelistConfigData?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
-                return src?.toJson()
-            }
-            override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): WhitelistConfigData {
-                return WhitelistConfigData.fromJson(json)
-            }
-        }
+
+    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): WhitelistConfigData? {
+        return WhitelistConfigData.fromJson(json)
+    }
 }
 
 internal interface WhitelistConfigFileLoader : JsonFileLoader<WhitelistConfigData> {
     companion object {
         fun registerGsonTypes(builder: GsonBuilder): GsonBuilder {
-            builder.registerTypeAdapter(WhitelistConfigData::class.java, WhitelistConfigData.JsonSerialiser())
+            builder.registerTypeAdapter(WhitelistConfigData::class.java, WhitelistConfigData.getDefault())
             return builder
         }
     }
