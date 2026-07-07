@@ -45,10 +45,11 @@ public class VerificationPlugin {
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
-        server.getEventManager().register(this, new OnPlayerJoinEvent(logger));
-        CommandRegistration.registerCommands(this, server);
         PluginDataLoader.setDataDirectory(data_directory);
         PluginDataLoader.loadDataFromFiles();
+        
+        server.getEventManager().register(this, new OnPlayerJoinEvent(logger));
+        CommandRegistration.registerCommands(this, server);
     }
 
     @Subscribe

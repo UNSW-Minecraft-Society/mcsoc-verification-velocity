@@ -63,8 +63,8 @@ object PluginDataLoader {
     val whitelisted_servers get() = whitelist_config.server_names
     
     private lateinit var message_config: MessageConfigData
-    val form_url = message_config.form_link
-    val discord_url = message_config.discord_link
+    val form_url get() = message_config.form_link
+    val discord_url get() = message_config.discord_link
     
     
     private fun loadConfigData() {
