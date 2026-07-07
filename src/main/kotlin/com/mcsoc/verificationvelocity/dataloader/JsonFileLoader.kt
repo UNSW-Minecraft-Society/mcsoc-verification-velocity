@@ -2,6 +2,7 @@ package com.mcsoc.verificationvelocity.dataloader
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 
 import java.io.File
 import java.io.FileReader
@@ -15,10 +16,20 @@ import kotlin.collections.Map
 
 
 internal interface JsonFileLoader <D> {
-
     fun getGsonParser(): Gson
     
-
+    fun getFileDataType(): Type
+    fun getDefaultFileData(): D
+    
+    fun saveConfigData(file_path: Path, config_data: D) {
+        writeToFileFromData(file_path, config_data, getFileDataType())
+    }
+    
+    fun loadConfigData(file_path: Path): D {
+        return readFromFileToData(file_path, getFileDataType()) ?: getDefaultFileData()
+    }
+    
+    
     private fun openFileChecked(file_path: Path): File? {
         val file = file_path.toFile()
         Files.createDirectories(file_path.parent)
@@ -27,14 +38,14 @@ internal interface JsonFileLoader <D> {
         return file
     }
 
-    fun writeToFileFromData(file_path: Path, data_obj: D, data_type: Type) {
+    private fun writeToFileFromData(file_path: Path, data_obj: D, data_type: Type) {
         val file = openFileChecked(file_path) ?: return
         FileWriter(file).use{writer  ->
             this.getGsonParser().toJson(data_obj, data_type, writer)
         }
     }
     
-    fun readFromFileToData(file_path: Path, data_type: Type): D? {
+    private fun readFromFileToData(file_path: Path, data_type: Type): D? {
         val file = openFileChecked(file_path) ?: return null
         FileReader(file).use{reader ->
             return this.getGsonParser().fromJson(reader, data_type)
