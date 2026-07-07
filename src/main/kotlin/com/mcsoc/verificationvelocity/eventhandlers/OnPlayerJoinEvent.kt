@@ -42,8 +42,7 @@ class OnPlayerJoinEvent(val logger: Logger) {
         val joiner = ctx.player
         
         val server_joining_name = ctx.result.server.getOrNull()?.serverInfo?.name
-        val whitelisted_servers = PluginDataLoader.getWhitelistedServers()
-        if (whitelisted_servers.none{it == server_joining_name}) {
+        if (PluginDataLoader.whitelisted_servers.none{it == server_joining_name}) {
             // joiner.disconnect(Component.text("no whitelist"))
             return
         }
@@ -52,8 +51,8 @@ class OnPlayerJoinEvent(val logger: Logger) {
             // joiner.disconnect(Component.text("passed whitelist"))
             return
         } else {
-            val form_url = PluginDataLoader.getFormUrl() 
-            val discord_url = PluginDataLoader.getDiscordUrl()
+            val form_url = PluginDataLoader.form_url
+            val discord_url = PluginDataLoader.discord_url
             ctx.result = ServerPreConnectEvent.ServerResult.denied()
             joiner.disconnect(DISCONNECT_MESSAGE(form_url, discord_url))
         }

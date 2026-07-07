@@ -30,7 +30,7 @@ object FirebaseReader {
     }
     
     fun getFindUserResponse(name: String): HttpResponse<String> {
-        val api_key = PluginDataLoader.getApiKey()
+        val api_key = PluginDataLoader.api_key
         val http_client = HttpClient.newBuilder().build()
         val request = HttpRequest.newBuilder()
             .uri(findUser_endpoint_url)

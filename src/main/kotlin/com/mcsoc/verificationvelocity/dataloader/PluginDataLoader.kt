@@ -10,6 +10,7 @@ import com.mcsoc.verificationvelocity.dataloader.configfileloaders.MessageConfig
 import com.mcsoc.verificationvelocity.dataloader.configfileloaders.WhitelistConfigData
 import com.mcsoc.verificationvelocity.dataloader.configfileloaders.WhitelistConfigFileLoader
 import java.lang.reflect.Type
+import kotlin.io.path.Path
 
 
 private const val MESSAGE_CONFIG_FILE_PATH = "message.json"
@@ -50,25 +51,21 @@ private object MessageDataLoader: MessageConfigFileLoader {
 object PluginDataLoader {
     private lateinit var message_config_path: Path
     private lateinit var whitelist_config_path: Path
+    
     @JvmStatic
-    fun setDataDirectory(data_directory: Path) {
-        whitelist_config_path = data_directory.resolve(WHITELIST_CONFIG_FILE_PATH)
-        message_config_path = data_directory.resolve(MESSAGE_CONFIG_FILE_PATH)
+    fun setDataDirectory(value: Path) {
+        whitelist_config_path = value.resolve(WHITELIST_CONFIG_FILE_PATH)
+        message_config_path = value.resolve(MESSAGE_CONFIG_FILE_PATH)
     }
+    
     private lateinit var whitelist_config: WhitelistConfigData
-    fun getApiKey(): String {
-        return whitelist_config.api_key
-    }
-    fun getWhitelistedServers(): List<String> {
-        return whitelist_config.server_names
-    }
+    val api_key get() = whitelist_config.api_key
+    val whitelisted_servers get() = whitelist_config.server_names
+    
     private lateinit var message_config: MessageConfigData
-    fun getFormUrl(): String {
-        return message_config.form_link
-    }
-    fun getDiscordUrl(): String {
-        return message_config.discord_link
-    }
+    val form_url = message_config.form_link
+    val discord_url = message_config.discord_link
+    
     
     private fun loadConfigData() {
         whitelist_config = WhitelistDataLoader.loadConfigData(whitelist_config_path)
