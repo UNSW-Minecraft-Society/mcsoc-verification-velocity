@@ -22,8 +22,7 @@ object FirebaseReader {
         }
         val res_json = JsonParser.parseString(find_user_res.body()).asJsonObject
         for (entry in res_json.get("results").asJsonArray) {
-            val is_verified = entry?.asJsonObject?.get("is_verified")?.asBoolean ?: continue
-            if (is_verified) return true
+            return entry?.asJsonObject?.get("is_verified")?.asBoolean ?: continue
         }
         
         return false

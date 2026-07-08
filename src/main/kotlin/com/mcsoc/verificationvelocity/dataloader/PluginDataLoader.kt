@@ -66,6 +66,7 @@ object PluginDataLoader {
     }
     
     private lateinit var config: ConfigData
+    val is_debug_mode get() = config.debug
 
     private val whitelist_config get() = config.whitelist_data
     val api_key get() = whitelist_config.api_key

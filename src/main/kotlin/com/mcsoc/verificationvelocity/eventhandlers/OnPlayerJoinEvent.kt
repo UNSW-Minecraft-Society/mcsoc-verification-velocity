@@ -45,11 +45,15 @@ class OnPlayerJoinEvent(val logger: Logger) {
         val server_joining_name = ctx.result.server.getOrNull()?.serverInfo?.name
         if (PluginDataLoader.whitelisted_servers.none{it == server_joining_name} ||
             VerifiedPlayersCacheLoader.checkIfPlayerPresent(joiner.gameProfile)
-        ) return joiner.disconnect(Component.text("no check necessary"))
+        ) {
+            joiner.takeIf{PluginDataLoader.is_debug_mode}?.disconnect(Component.text("no check necessary"))
+            return
+        }
         
         if (FirebaseReader.checkIfPlayerIsWhitelisted(joiner, logger)) {
             VerifiedPlayersCacheLoader.cachePlayer(joiner.gameProfile)
-            return joiner.disconnect(Component.text("passed whitelist"))
+            joiner.takeIf{PluginDataLoader.is_debug_mode}?.disconnect(Component.text("passed whitelist"))
+            return
         } else {
             val form_url = PluginDataLoader.form_url
             val discord_url = PluginDataLoader.discord_url
