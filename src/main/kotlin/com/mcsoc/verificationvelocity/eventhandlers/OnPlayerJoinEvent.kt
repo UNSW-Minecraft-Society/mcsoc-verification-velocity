@@ -1,5 +1,6 @@
 package com.mcsoc.verificationvelocity.eventhandlers
 
+import com.mcsoc.verificationvelocity.database.VerifiedPlayersCacheLoader
 import com.mcsoc.verificationvelocity.dataloader.PluginDataLoader
 import com.mcsoc.verificationvelocity.firebase.FirebaseReader
 import com.velocitypowered.api.event.Subscribe
@@ -42,14 +43,13 @@ class OnPlayerJoinEvent(val logger: Logger) {
         val joiner = ctx.player
         
         val server_joining_name = ctx.result.server.getOrNull()?.serverInfo?.name
-        if (PluginDataLoader.whitelisted_servers.none{it == server_joining_name}) {
-            // joiner.disconnect(Component.text("no whitelist"))
-            return
-        }
+        if (PluginDataLoader.whitelisted_servers.none{it == server_joining_name} ||
+            VerifiedPlayersCacheLoader.checkIfPlayerPresent(joiner.gameProfile)
+        ) return joiner.disconnect(Component.text("no check necessary"))
         
         if (FirebaseReader.checkIfPlayerIsWhitelisted(joiner, logger)) {
-            // joiner.disconnect(Component.text("passed whitelist"))
-            return
+            VerifiedPlayersCacheLoader.cachePlayer(joiner.gameProfile)
+            return joiner.disconnect(Component.text("passed whitelist"))
         } else {
             val form_url = PluginDataLoader.form_url
             val discord_url = PluginDataLoader.discord_url
