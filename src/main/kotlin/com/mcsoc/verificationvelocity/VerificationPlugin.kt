@@ -1,10 +1,9 @@
 package com.mcsoc.verificationvelocity
 
 import com.google.inject.Inject
-import com.velocitypowered.api.command.BrigadierCommand
+import com.mcsoc.verificationvelocity.database.VerifiedPlayersCacheLoader
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
-import com.velocitypowered.api.event.proxy.ProxyPreShutdownEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.annotation.DataDirectory
@@ -47,6 +46,8 @@ class VerificationPlugin {
     fun onProxyInitialize(event: ProxyInitializeEvent) {
         PluginDataLoader.setDataDirectory(data_directory)
         PluginDataLoader.loadDataFromFiles()
+        
+        VerifiedPlayersCacheLoader.initialise(data_directory)
 
         server.eventManager.register(this, OnPlayerJoinEvent(logger))
         CommandRegistration.registerCommands(this, server)
