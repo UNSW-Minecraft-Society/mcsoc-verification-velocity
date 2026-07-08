@@ -61,8 +61,8 @@ object PluginDataLoader {
     @JvmStatic
     fun setDataDirectory(value: Path) {
         config_path = value.resolve(CONFIG_FILE_PATH)
-        value.createParentDirectories()
-        value.takeIf{it.notExists()}?.createFile()
+        config_path.createParentDirectories()
+        config_path.takeIf{it.notExists()}?.createFile()
     }
     
     private lateinit var config: ConfigData
