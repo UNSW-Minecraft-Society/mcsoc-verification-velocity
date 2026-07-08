@@ -3,3 +3,8 @@ build/*
 .DS_Store
 .vscode/*
 .kotlin/*
+velocity_server/lang/*
+velocity_server/logs/*
+velocity_server/plugins/*
+velocity_server/.console_history
+velocity_server/forwarding.secret
