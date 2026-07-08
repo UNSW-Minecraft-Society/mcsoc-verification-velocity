@@ -11,8 +11,6 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 
 import java.nio.file.Path
-import java.sql.DriverManager
-import java.sql.SQLException
 
 import org.slf4j.Logger
 
