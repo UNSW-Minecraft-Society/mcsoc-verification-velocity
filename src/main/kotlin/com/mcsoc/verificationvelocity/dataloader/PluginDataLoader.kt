@@ -1,81 +1,95 @@
 package com.mcsoc.verificationvelocity.dataloader
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
+import com.akuleshov7.ktoml.file.TomlFileReader
+import com.akuleshov7.ktoml.file.TomlFileWriter
+import com.akuleshov7.ktoml.source.decodeFromStream
 import java.nio.file.Path
 
-import com.mcsoc.verificationvelocity.dataloader.configfileloaders.MessageConfigData
-import com.mcsoc.verificationvelocity.dataloader.configfileloaders.MessageConfigFileLoader
-import com.mcsoc.verificationvelocity.dataloader.configfileloaders.WhitelistConfigData
-import com.mcsoc.verificationvelocity.dataloader.configfileloaders.WhitelistConfigFileLoader
-import java.lang.reflect.Type
-import kotlin.io.path.Path
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.createFile
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.inputStream
+import kotlin.io.path.notExists
 
 
-private const val MESSAGE_CONFIG_FILE_PATH = "message.json"
-private const val WHITELIST_CONFIG_FILE_PATH = "whitelist.json"
+private const val CONFIG_FILE_PATH = "config.toml"
 
-private object WhitelistDataLoader: WhitelistConfigFileLoader {
-    override fun getGsonParser(): Gson {
-        var gson_builder = GsonBuilder()
-        gson_builder = WhitelistConfigFileLoader.registerGsonTypes(gson_builder)
-        return gson_builder.setPrettyPrinting().create()
-    }
-
-    override fun getDefaultFileData(): WhitelistConfigData {
-        return WhitelistConfigData.getDefault()
-    }
-
-    override fun getFileDataType(): Type {
-        return object: TypeToken<WhitelistConfigData>(){}.type
+@Serializable
+data class ConfigData(
+    val debug: Boolean,
+    @SerialName("whitelist")
+    val whitelist_data: WhitelistConfigData,
+    @SerialName("disconnect")
+    val disconnect_message_data: DisconnectMessageConfigData
+) {
+    companion object {
+        fun getDefault(): ConfigData {
+            return ConfigData(false, WhitelistConfigData.getDefault(), DisconnectMessageConfigData.getDefault())
+        }
     }
 }
 
-private object MessageDataLoader: MessageConfigFileLoader {
-    override fun getGsonParser(): Gson {
-        var gson_builder = GsonBuilder()
-        gson_builder = WhitelistConfigFileLoader.registerGsonTypes(gson_builder)
-        return gson_builder.setPrettyPrinting().create()
+@Serializable
+data class WhitelistConfigData(
+    val api_key: String,
+    val whitelisted_servers: List<String>
+) {
+    companion object {
+        fun getDefault(): WhitelistConfigData {
+            return WhitelistConfigData("fakekey123", listOf("server1", "server2"))
+        }
     }
-    
-    override fun getDefaultFileData(): MessageConfigData {
-        return MessageConfigData.getDefault()
-    }
-    
-    override fun getFileDataType(): Type {
-        return object: TypeToken<MessageConfigData>(){}.type
+}
+
+@Serializable
+data class DisconnectMessageConfigData(
+    val form_url: String,
+    val discord_url: String
+) {
+    companion object {
+        fun getDefault(): DisconnectMessageConfigData {
+            return DisconnectMessageConfigData("forms.google.com/formurl", "discord.gg/yourinvite")
+        }
     }
 }
 
 object PluginDataLoader {
-    private lateinit var message_config_path: Path
-    private lateinit var whitelist_config_path: Path
+    private lateinit var config_path: Path
     
     @JvmStatic
     fun setDataDirectory(value: Path) {
-        whitelist_config_path = value.resolve(WHITELIST_CONFIG_FILE_PATH)
-        message_config_path = value.resolve(MESSAGE_CONFIG_FILE_PATH)
+        config_path = value.resolve(CONFIG_FILE_PATH)
+        value.createParentDirectories()
+        value.takeIf{it.notExists()}?.createFile()
     }
     
-    private lateinit var whitelist_config: WhitelistConfigData
+    private lateinit var config: ConfigData
+
+    private val whitelist_config get() = config.whitelist_data
     val api_key get() = whitelist_config.api_key
-    val whitelisted_servers get() = whitelist_config.server_names
+    val whitelisted_servers get() = whitelist_config.whitelisted_servers
     
-    private lateinit var message_config: MessageConfigData
-    val form_url get() = message_config.form_link
-    val discord_url get() = message_config.discord_link
+    private val disconnect_message_config get() = config.disconnect_message_data
+    val form_url get() = disconnect_message_config.form_url
+    val discord_url get() = disconnect_message_config.discord_url
     
     
     private fun loadConfigData() {
-        whitelist_config = WhitelistDataLoader.loadConfigData(whitelist_config_path)
-        message_config = MessageDataLoader.loadConfigData(message_config_path)
+        
+        config = config_path.inputStream().runCatching{
+            TomlFileReader.decodeFromStream(ConfigData.serializer(),this)
+        }.getOrNull() ?: ConfigData.getDefault()
+
+        saveConfigData()
     }
     private fun saveConfigData() {
-        WhitelistDataLoader.saveConfigData(whitelist_config_path, whitelist_config)
-        MessageDataLoader.saveConfigData(message_config_path, message_config)
+        TomlFileWriter().apply{
+            this.encodeToFile(ConfigData.serializer(), config, config_path.absolutePathString())
+        }
     }
-    
+
     @JvmStatic
     fun loadDataFromFiles() {
         this.loadConfigData()
