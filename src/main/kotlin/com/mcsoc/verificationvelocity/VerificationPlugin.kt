@@ -45,7 +45,7 @@ class VerificationPlugin {
 
     @Subscribe
     fun onProxyInitialize(event: ProxyInitializeEvent) {
-        PluginDataLoader.setDataDirectory(data_directory)
+        PluginDataLoader.initialise(data_directory)
         PluginDataLoader.loadDataFromFiles()
 
         server.eventManager.register(this, OnPlayerJoinEvent(logger))
