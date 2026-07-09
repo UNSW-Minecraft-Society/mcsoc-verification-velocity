@@ -1,4 +1,4 @@
-package com.mcsoc.verificationvelocity.dataloader
+package com.mcsoc.verificationvelocity.configloader
 
 import com.akuleshov7.ktoml.file.TomlFileReader
 import com.akuleshov7.ktoml.file.TomlFileWriter
@@ -59,7 +59,7 @@ data class DisconnectMessageConfigData(
     }
 }
 
-object PluginDataLoader {
+object PluginConfigLoader {
     private lateinit var config_path: Path
     private lateinit var logger: Logger
     

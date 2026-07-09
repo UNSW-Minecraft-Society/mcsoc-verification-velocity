@@ -1,7 +1,7 @@
 package com.mcsoc.verificationvelocity.firebase
 
 import com.google.gson.JsonParser
-import com.mcsoc.verificationvelocity.dataloader.PluginDataLoader
+import com.mcsoc.verificationvelocity.configloader.PluginConfigLoader
 import com.velocitypowered.api.proxy.Player
 import org.slf4j.Logger
 import java.net.URI
@@ -30,7 +30,7 @@ object FirebaseReader {
     }
     
     fun getFindUserResponse(name: String): HttpResponse<String> {
-        val api_key = PluginDataLoader.api_key
+        val api_key = PluginConfigLoader.api_key
         val http_client = HttpClient.newBuilder().build()
         val request = HttpRequest.newBuilder()
             .uri(findUser_endpoint_url)

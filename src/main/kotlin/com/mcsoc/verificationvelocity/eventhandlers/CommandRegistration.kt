@@ -7,8 +7,7 @@ import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.proxy.ProxyServer
 
 import com.mcsoc.verificationvelocity.VerificationPlugin
-import com.mcsoc.verificationvelocity.dataloader.PluginDataLoader
-import com.velocitypowered.api.command.CommandManager
+import com.mcsoc.verificationvelocity.configloader.PluginConfigLoader
 
 
 object CommandRegistration {
@@ -29,7 +28,7 @@ object CommandRegistration {
         .then(BrigadierCommand.literalArgumentBuilder("reload")
         .executes{ctx ->
             val source = ctx.source
-            PluginDataLoader.loadDataFromFiles()
+            PluginConfigLoader.loadDataFromFiles()
             return@executes Command.SINGLE_SUCCESS
         })
         return BrigadierCommand(rootNode)
