@@ -1,7 +1,7 @@
 package com.mcsoc.verificationvelocity.firebase
 
 import com.google.gson.JsonParser
-import com.mcsoc.verificationvelocity.dataloader.PluginDataLoader
+import com.mcsoc.verificationvelocity.configloader.PluginConfigLoader
 import com.velocitypowered.api.proxy.Player
 import org.slf4j.Logger
 import java.net.URI
@@ -9,8 +9,6 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-
-val findUser_endpoint_url = URI.create("https://finduser-l7edgf7twa-an.a.run.app")
 
 object FirebaseReader {
     fun checkIfPlayerIsWhitelisted(player: Player, logger: Logger): Boolean {
@@ -29,12 +27,13 @@ object FirebaseReader {
     }
     
     fun getFindUserResponse(name: String): HttpResponse<String> {
-        val api_key = PluginDataLoader.api_key
+        val runner_url = URI(PluginConfigLoader.findUser_url)
+        val api_key = PluginConfigLoader.api_key
         val http_client = HttpClient.newBuilder().build()
         val request = HttpRequest.newBuilder()
-            .uri(findUser_endpoint_url)
+            .uri(runner_url)
             .header("Content-Type", "application/json")
-            .header("Authorization", api_key)
+            .header("Authorization", "Bearer $api_key")
             .POST(HttpRequest.BodyPublishers.ofString("{\"minecraft_username\":\"$name\"}"))
             .build()
             

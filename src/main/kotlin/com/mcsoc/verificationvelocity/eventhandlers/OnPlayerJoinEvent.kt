@@ -1,12 +1,11 @@
 package com.mcsoc.verificationvelocity.eventhandlers
 
 import com.mcsoc.verificationvelocity.database.VerifiedPlayersCacheLoader
-import com.mcsoc.verificationvelocity.dataloader.PluginDataLoader
+import com.mcsoc.verificationvelocity.configloader.PluginConfigLoader
 import com.mcsoc.verificationvelocity.firebase.FirebaseReader
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import org.slf4j.Logger
 import kotlin.jvm.optionals.getOrNull
@@ -43,7 +42,7 @@ class OnPlayerJoinEvent(val logger: Logger) {
         val joiner = ctx.player
         
         val server_joining_name = ctx.result.server.getOrNull()?.serverInfo?.name
-        if (PluginDataLoader.whitelisted_servers.none{it == server_joining_name} ||
+        if (PluginConfigLoader.whitelisted_servers.none{it == server_joining_name} ||
             VerifiedPlayersCacheLoader.checkIfPlayerPresent(joiner.gameProfile)
         ) {
             joiner.takeIf{PluginDataLoader.is_debug_mode}?.disconnect(Component.text("no check necessary"))
@@ -55,8 +54,8 @@ class OnPlayerJoinEvent(val logger: Logger) {
             joiner.takeIf{PluginDataLoader.is_debug_mode}?.disconnect(Component.text("passed whitelist"))
             return
         } else {
-            val form_url = PluginDataLoader.form_url
-            val discord_url = PluginDataLoader.discord_url
+            val form_url = PluginConfigLoader.form_url
+            val discord_url = PluginConfigLoader.discord_url
             ctx.result = ServerPreConnectEvent.ServerResult.denied()
             joiner.disconnect(DISCONNECT_MESSAGE(form_url, discord_url))
         }

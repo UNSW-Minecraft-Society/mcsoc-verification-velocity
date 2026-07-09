@@ -1,4 +1,4 @@
-package com.mcsoc.verificationvelocity.dataloader
+package com.mcsoc.verificationvelocity.configloader
 
 import com.akuleshov7.ktoml.file.TomlFileReader
 import com.akuleshov7.ktoml.file.TomlFileWriter
@@ -7,68 +7,76 @@ import java.nio.file.Path
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createFile
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.inputStream
 import kotlin.io.path.notExists
 
+import org.slf4j.Logger
+import java.io.IOException
+
 
 private const val CONFIG_FILE_PATH = "config.toml"
 
 @Serializable
-data class ConfigData(
-    val debug: Boolean,
+internal data class ConfigData(
+    val debug: Boolean = false,
     @SerialName("whitelist")
-    val whitelist_data: WhitelistConfigData,
+    val whitelist_data: WhitelistConfigData = WhitelistConfigData.getDefault(), 
     @SerialName("disconnect")
-    val disconnect_message_data: DisconnectMessageConfigData
+    val disconnect_message_data: DisconnectMessageConfigData = DisconnectMessageConfigData.getDefault()
 ) {
     companion object {
         fun getDefault(): ConfigData {
-            return ConfigData(false, WhitelistConfigData.getDefault(), DisconnectMessageConfigData.getDefault())
+            return ConfigData()
         }
     }
 }
 
 @Serializable
-data class WhitelistConfigData(
-    val api_key: String,
-    val whitelisted_servers: List<String>
+internal data class WhitelistConfigData(
+    val findUser_url: String = "https://finduser-blahblah.run.app",
+    val api_key: String = "fakekey123",
+    val whitelisted_servers: List<String> = listOf("server1", "server2")
 ) {
     companion object {
         fun getDefault(): WhitelistConfigData {
-            return WhitelistConfigData("fakekey123", listOf("server1", "server2"))
+            return WhitelistConfigData()
         }
     }
 }
 
 @Serializable
-data class DisconnectMessageConfigData(
-    val form_url: String,
-    val discord_url: String
+internal data class DisconnectMessageConfigData(
+    val form_url: String = "forms.google.com/formurl",
+    val discord_url: String = "discord.gg/yourinvite"
 ) {
     companion object {
         fun getDefault(): DisconnectMessageConfigData {
-            return DisconnectMessageConfigData("forms.google.com/formurl", "discord.gg/yourinvite")
+            return DisconnectMessageConfigData()
         }
     }
 }
 
-object PluginDataLoader {
+object PluginConfigLoader {
     private lateinit var config_path: Path
+    private lateinit var logger: Logger
     
     @JvmStatic
-    fun initialise(value: Path) {
+    fun initialise(value: Path, logger: Logger) {
         config_path = value.resolve(CONFIG_FILE_PATH)
         config_path.createParentDirectories()
         config_path.takeIf{it.notExists()}?.createFile()
+        this.logger = logger
     }
     
     private lateinit var config: ConfigData
     val is_debug_mode get() = config.debug
 
     private val whitelist_config get() = config.whitelist_data
+    val findUser_url get() = whitelist_config.findUser_url
     val api_key get() = whitelist_config.api_key
     val whitelisted_servers get() = whitelist_config.whitelisted_servers
     
@@ -78,13 +86,23 @@ object PluginDataLoader {
     
     
     private fun loadConfigData() {
+        config = try {
+            config_path.inputStream().use{
+                TomlFileReader.decodeFromStream(ConfigData.serializer(), it)
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is SerializationException -> logger.error("Error while deserialising ConfigData: ", e)
+                is IllegalArgumentException -> logger.error("Invalid ConfigData: ", e)
+                is IOException -> logger.error("Cannot read config file: ", e)
+                else -> throw e
+            }
+            ConfigData.getDefault()
+        }
         
-        config = config_path.inputStream().runCatching{
-            TomlFileReader.decodeFromStream(ConfigData.serializer(),this)
-        }.getOrNull() ?: ConfigData.getDefault()
-
         saveConfigData()
     }
+    
     private fun saveConfigData() {
         TomlFileWriter().apply{
             this.encodeToFile(ConfigData.serializer(), config, config_path.absolutePathString())

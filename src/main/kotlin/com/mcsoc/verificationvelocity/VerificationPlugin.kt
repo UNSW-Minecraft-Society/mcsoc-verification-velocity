@@ -13,7 +13,7 @@ import java.nio.file.Path
 
 import org.slf4j.Logger
 
-import com.mcsoc.verificationvelocity.dataloader.PluginDataLoader;
+import com.mcsoc.verificationvelocity.configloader.PluginConfigLoader;
 import com.mcsoc.verificationvelocity.eventhandlers.CommandRegistration;
 import com.mcsoc.verificationvelocity.eventhandlers.OnPlayerJoinEvent;
 
@@ -44,8 +44,8 @@ class VerificationPlugin {
 
     @Subscribe
     fun onProxyInitialize(event: ProxyInitializeEvent) {
-        PluginDataLoader.initialise(data_directory)
-        PluginDataLoader.loadDataFromFiles()
+        PluginConfigLoader.initialise(data_directory, logger)
+        PluginConfigLoader.loadDataFromFiles()
         
         VerifiedPlayersCacheLoader.initialise(data_directory)
 
@@ -55,6 +55,6 @@ class VerificationPlugin {
 
     @Subscribe
     fun onProxyShutdown(event: ProxyShutdownEvent) {
-        PluginDataLoader.saveDataToFiles()
+        PluginConfigLoader.saveDataToFiles()
     }
 }
