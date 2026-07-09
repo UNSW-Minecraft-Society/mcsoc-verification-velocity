@@ -83,21 +83,23 @@ object PluginConfigLoader {
     
     
     private fun loadConfigData() {
-        try {
-            TomlFileReader.decodeFromStream(ConfigData.serializer(), config_path.inputStream())
-        } catch (e: SerializationException) {
-            logger.error("SerializationException: Cannot deserialize ConfigData.")
-        } catch (e: IllegalArgumentException) {
-            logger.error("IllegalArgumentException: Invalid ConfigData.")
-        } catch (e: IOException) {
-            logger.error("IOException: Cannot read from stream.")
+        config = try {
+            config_path.inputStream().use{
+                TomlFileReader.decodeFromStream(ConfigData.serializer(), it)
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is SerializationException -> logger.error("Error while deserialising ConfigData: ", e)
+                is IllegalArgumentException -> logger.error("Invalid ConfigData: ", e)
+                is IOException -> logger.error("Cannot read config file: ", e)
+                else -> throw e
+            }
+            ConfigData.getDefault()
         }
-        config = config_path.inputStream().runCatching{
-            TomlFileReader.decodeFromStream(ConfigData.serializer(),this)
-        }.getOrNull() ?: ConfigData.getDefault()
-
+        
         saveConfigData()
     }
+    
     private fun saveConfigData() {
         TomlFileWriter().apply{
             this.encodeToFile(ConfigData.serializer(), config, config_path.absolutePathString())
