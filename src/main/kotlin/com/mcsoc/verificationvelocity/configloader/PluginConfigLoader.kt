@@ -21,41 +21,41 @@ import java.io.IOException
 private const val CONFIG_FILE_PATH = "config.toml"
 
 @Serializable
-data class ConfigData(
-    val debug: Boolean,
+internal data class ConfigData(
+    val debug: Boolean = false,
     @SerialName("whitelist")
-    val whitelist_data: WhitelistConfigData,
+    val whitelist_data: WhitelistConfigData = WhitelistConfigData.getDefault(), 
     @SerialName("disconnect")
-    val disconnect_message_data: DisconnectMessageConfigData
+    val disconnect_message_data: DisconnectMessageConfigData = DisconnectMessageConfigData.getDefault()
 ) {
     companion object {
         fun getDefault(): ConfigData {
-            return ConfigData(false, WhitelistConfigData.getDefault(), DisconnectMessageConfigData.getDefault())
+            return ConfigData()
         }
     }
 }
 
 @Serializable
-data class WhitelistConfigData(
-    val findUser_url: String,
-    val api_key: String,
-    val whitelisted_servers: List<String>
+internal data class WhitelistConfigData(
+    val findUser_url: String = "https://finduser-blahblah.run.app",
+    val api_key: String = "fakekey123",
+    val whitelisted_servers: List<String> = listOf("server1", "server2")
 ) {
     companion object {
         fun getDefault(): WhitelistConfigData {
-            return WhitelistConfigData("https://finduser-blahblah.run.app", "fakekey123", listOf("server1", "server2"))
+            return WhitelistConfigData()
         }
     }
 }
 
 @Serializable
-data class DisconnectMessageConfigData(
-    val form_url: String,
-    val discord_url: String
+internal data class DisconnectMessageConfigData(
+    val form_url: String = "forms.google.com/formurl",
+    val discord_url: String = "discord.gg/yourinvite"
 ) {
     companion object {
         fun getDefault(): DisconnectMessageConfigData {
-            return DisconnectMessageConfigData("forms.google.com/formurl", "discord.gg/yourinvite")
+            return DisconnectMessageConfigData()
         }
     }
 }
@@ -75,6 +75,7 @@ object PluginConfigLoader {
     private lateinit var config: ConfigData
 
     private val whitelist_config get() = config.whitelist_data
+    val findUser_url get() = whitelist_config.findUser_url
     val api_key get() = whitelist_config.api_key
     val whitelisted_servers get() = whitelist_config.whitelisted_servers
     
