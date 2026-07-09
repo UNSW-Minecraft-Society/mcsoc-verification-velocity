@@ -35,7 +35,7 @@ object FirebaseReader {
         val request = HttpRequest.newBuilder()
             .uri(findUser_endpoint_url)
             .header("Content-Type", "application/json")
-            .header("Authorization", api_key)
+            .header("Authorization", "Bearer $api_key")
             .POST(HttpRequest.BodyPublishers.ofString("{\"minecraft_username\":\"$name\"}"))
             .build()
             
