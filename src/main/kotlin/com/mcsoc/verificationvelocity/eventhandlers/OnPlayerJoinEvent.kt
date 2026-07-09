@@ -21,7 +21,7 @@ private val DISCONNECT_MESSAGE = {form_url: String, discord_invite: String ->
             Component.text(form_url)
             .color(NamedTextColor.LIGHT_PURPLE)
             .append(
-                Component.text("\nand join the discord ")
+                Component.text("\nand join the discord: ")
                 .color(NamedTextColor.GRAY)
                 .append(
                     Component.text(discord_invite)

@@ -15,7 +15,7 @@ object FirebaseReader {
         val username = player.gameProfile.name
         val find_user_res = getFindUserResponse(username)
         if (find_user_res.body() == "Unauthorized") {
-            logger.error("Unable to authorise with Firebase! Check that the API Key in config.json is valid.")
+            logger.error("Unable to authorise with Firebase! Check that the runner url and API Key in config.toml are valid.")
             return false
         }
         val res_json = JsonParser.parseString(find_user_res.body()).asJsonObject
