@@ -10,8 +10,6 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 
-val findUser_endpoint_url = URI.create("https://finduser-l7edgf7twa-an.a.run.app")
-
 object FirebaseReader {
     fun checkIfPlayerIsWhitelisted(player: Player, logger: Logger): Boolean {
         val username = player.gameProfile.name
@@ -30,10 +28,11 @@ object FirebaseReader {
     }
     
     fun getFindUserResponse(name: String): HttpResponse<String> {
+        val runner_url = URI(PluginConfigLoader.findUser_url)
         val api_key = PluginConfigLoader.api_key
         val http_client = HttpClient.newBuilder().build()
         val request = HttpRequest.newBuilder()
-            .uri(findUser_endpoint_url)
+            .uri(runner_url)
             .header("Content-Type", "application/json")
             .header("Authorization", "Bearer $api_key")
             .POST(HttpRequest.BodyPublishers.ofString("{\"minecraft_username\":\"$name\"}"))
