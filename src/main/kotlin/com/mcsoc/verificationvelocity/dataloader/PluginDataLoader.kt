@@ -7,11 +7,15 @@ import java.nio.file.Path
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createFile
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.inputStream
 import kotlin.io.path.notExists
+
+import org.slf4j.Logger
+import java.io.IOException
 
 
 private const val CONFIG_FILE_PATH = "config.toml"
@@ -57,12 +61,14 @@ data class DisconnectMessageConfigData(
 
 object PluginDataLoader {
     private lateinit var config_path: Path
+    private lateinit var logger: Logger
     
     @JvmStatic
-    fun initialise(value: Path) {
+    fun initialise(value: Path, logger: Logger) {
         config_path = value.resolve(CONFIG_FILE_PATH)
         config_path.createParentDirectories()
         config_path.takeIf{it.notExists()}?.createFile()
+        this.logger = logger
     }
     
     private lateinit var config: ConfigData
@@ -77,7 +83,15 @@ object PluginDataLoader {
     
     
     private fun loadConfigData() {
-        
+        try {
+            TomlFileReader.decodeFromStream(ConfigData.serializer(), config_path.inputStream())
+        } catch (e: SerializationException) {
+            logger.error("SerializationException: Cannot deserialize ConfigData.")
+        } catch (e: IllegalArgumentException) {
+            logger.error("IllegalArgumentException: Invalid ConfigData.")
+        } catch (e: IOException) {
+            logger.error("IOException: Cannot read from stream.")
+        }
         config = config_path.inputStream().runCatching{
             TomlFileReader.decodeFromStream(ConfigData.serializer(),this)
         }.getOrNull() ?: ConfigData.getDefault()
