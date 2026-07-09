@@ -37,12 +37,13 @@ data class ConfigData(
 
 @Serializable
 data class WhitelistConfigData(
+    val findUser_url: String,
     val api_key: String,
     val whitelisted_servers: List<String>
 ) {
     companion object {
         fun getDefault(): WhitelistConfigData {
-            return WhitelistConfigData("fakekey123", listOf("server1", "server2"))
+            return WhitelistConfigData("https://finduser-blahblah.run.app", "fakekey123", listOf("server1", "server2"))
         }
     }
 }
