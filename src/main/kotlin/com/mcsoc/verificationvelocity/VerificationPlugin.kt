@@ -49,7 +49,7 @@ class VerificationPlugin {
         
         VerifiedPlayersCacheLoader.initialise(data_directory)
 
-        server.eventManager.register(this, OnPlayerJoinEvent(logger))
+        server.eventManager.register(this, OnPlayerJoinEvent(server, logger))
         CommandRegistration.registerCommands(this, server)
     }
 
