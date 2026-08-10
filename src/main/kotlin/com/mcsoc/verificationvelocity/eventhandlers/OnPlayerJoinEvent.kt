@@ -5,10 +5,12 @@ import com.mcsoc.verificationvelocity.configloader.PluginConfigLoader
 import com.mcsoc.verificationvelocity.firebase.FirebaseReader
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
+import com.velocitypowered.api.proxy.Player
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.slf4j.Logger
 import kotlin.jvm.optionals.getOrNull
+
 
 
 private val DISCONNECT_MESSAGE = {form_url: String, discord_invite: String -> 
@@ -36,6 +38,13 @@ private val DISCONNECT_MESSAGE = {form_url: String, discord_invite: String ->
     )
 }
 
+private fun handleUnverifiedPlayer(joiner: Player, ctx: ServerPreConnectEvent) {
+    val form_url = PluginConfigLoader.form_url
+    val discord_url = PluginConfigLoader.discord_url
+    ctx.result = ServerPreConnectEvent.ServerResult.denied()
+    joiner.disconnect(DISCONNECT_MESSAGE(form_url, discord_url))
+}
+
 class OnPlayerJoinEvent(val logger: Logger) {
     @Subscribe(priority = 10)
     fun checkIfWhitelisted(ctx: ServerPreConnectEvent) {
@@ -54,10 +63,7 @@ class OnPlayerJoinEvent(val logger: Logger) {
             joiner.takeIf{PluginConfigLoader.is_debug_mode}?.disconnect(Component.text("passed whitelist"))
             return
         } else {
-            val form_url = PluginConfigLoader.form_url
-            val discord_url = PluginConfigLoader.discord_url
-            ctx.result = ServerPreConnectEvent.ServerResult.denied()
-            joiner.disconnect(DISCONNECT_MESSAGE(form_url, discord_url))
+            handleUnverifiedPlayer(joiner, ctx)
         }
     }
 }
