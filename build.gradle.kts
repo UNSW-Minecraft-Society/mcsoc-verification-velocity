@@ -8,7 +8,7 @@ plugins {
 
 group = "com.mcsoc.verificationvelocity"
 
-version = "0.3.0"
+version = "0.3.1"
 val velocity_api_version="3.5.0-SNAPSHOT"
 
 
