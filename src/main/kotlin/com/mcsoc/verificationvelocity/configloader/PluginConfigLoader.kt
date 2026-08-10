@@ -22,15 +22,28 @@ private const val CONFIG_FILE_PATH = "config.toml"
 
 @Serializable
 internal data class ConfigData(
-    val debug: Boolean = false,
     @SerialName("whitelist")
     val whitelist_data: WhitelistConfigData = WhitelistConfigData.getDefault(), 
     @SerialName("disconnect")
-    val disconnect_message_data: DisconnectMessageConfigData = DisconnectMessageConfigData.getDefault()
+    val disconnect_message_data: DisconnectMessageConfigData = DisconnectMessageConfigData.getDefault(),
+    @SerialName("debug")
+    val debug_data: DebugConfigData = DebugConfigData.getDefault()
 ) {
     companion object {
         fun getDefault(): ConfigData {
             return ConfigData()
+        }
+    }
+}
+
+@Serializable
+internal data class DebugConfigData(
+    val early_disconnect: Boolean = false,
+    val autofail: Boolean = false,
+) {
+    companion object {
+        fun getDefault(): DebugConfigData {
+            return DebugConfigData()
         }
     }
 }
@@ -73,7 +86,9 @@ object PluginConfigLoader {
     }
     
     private lateinit var config: ConfigData
-    val is_debug_mode get() = config.debug
+    private val debug_config get() = config.debug_data
+    val debug_earlydisconnect get() = debug_config.early_disconnect
+    val debug_autofail get() = debug_config.autofail
 
     private val whitelist_config get() = config.whitelist_data
     val findUser_url get() = whitelist_config.findUser_url
