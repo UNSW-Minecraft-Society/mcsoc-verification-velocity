@@ -101,19 +101,18 @@ class OnPlayerJoinEvent(val proxy: ProxyServer, val logger: Logger) {
         ) {
             if (PluginConfigLoader.debug_earlydisconnect) {
                 joiner.disconnect(Component.text("no check necessary"))
-                return
             }
+            return
         }
         
         if (FirebaseReader.checkIfPlayerIsWhitelisted(joiner, logger)) {
             VerifiedPlayersCacheLoader.cachePlayer(joiner.gameProfile)
             if (PluginConfigLoader.debug_earlydisconnect) {
                 joiner.disconnect(Component.text("passed whitelist"))
-                return
             }
+            return
         } else {
             handleUnverifiedPlayer(ctx, proxy, logger)
-            return
         }
     }
 }
