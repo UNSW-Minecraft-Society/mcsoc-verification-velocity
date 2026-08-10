@@ -1,5 +1,6 @@
 package com.mcsoc.verificationvelocity.configloader
 
+import com.akuleshov7.ktoml.TomlInputConfig
 import com.akuleshov7.ktoml.file.TomlFileReader
 import com.akuleshov7.ktoml.file.TomlFileWriter
 import com.akuleshov7.ktoml.source.decodeFromStream
@@ -102,8 +103,10 @@ object PluginConfigLoader {
     
     private fun loadConfigData() {
         config = try {
-            config_path.inputStream().use{
-                TomlFileReader.decodeFromStream(ConfigData.serializer(), it)
+            config_path.inputStream().use {
+                TomlFileReader(
+                    TomlInputConfig.compliant(ignoreUnknownNames = true, allowEmptyToml = true)
+                ).decodeFromStream(ConfigData.serializer(), it)
             }
         } catch (e: Exception) {
             when (e) {
