@@ -4,6 +4,11 @@ import kotlin.jvm.optionals.getOrNull
 import kotlin.time.Duration.Companion.milliseconds
 import org.slf4j.Logger
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import com.velocitypowered.api.proxy.ProxyServer
@@ -44,21 +49,49 @@ private val DISCONNECT_MESSAGE = {form_url: String, discord_invite: String ->
     )
 }
 
-private fun handleUnverifiedPlayer(ctx: ServerPreConnectEvent, logger: Logger) {
-    val form_url = PluginConfigLoader.form_url
-    val discord_url = PluginConfigLoader.discord_url
-    val joiner = ctx.player
-    ctx.result = ServerPreConnectEvent.ServerResult.denied()
-    joiner.disconnect(DISCONNECT_MESSAGE(form_url, discord_url))
+private fun handlePlayerLimboTransfer(ctx: ServerPreConnectEvent, limbo: RegisteredServer, message: Component, logger: Logger) {
+    ctx.result = ServerPreConnectEvent.ServerResult.allowed(limbo)
+    
+    CoroutineScope(Dispatchers.Default).launch {
+        val joiner = ctx.player
+        
+        // Don't hog CPU with polls ig 
+        while (joiner.isActive && joiner.currentServer.getOrNull()?.server != limbo) {
+            delay(500.milliseconds)
+        } 
+    
+        delay(200.milliseconds)
+        joiner.sendMessage(message)
+    }
 }
 
-class OnPlayerJoinEvent(val logger: Logger) {
+private fun handleUnverifiedPlayer(ctx: ServerPreConnectEvent, proxy: ProxyServer, logger: Logger) {
+    val form_url = PluginConfigLoader.form_url
+    val discord_url = PluginConfigLoader.discord_url
+    
+    val limbo_server_name = PluginConfigLoader.limbo_server
+    
+    val joiner = ctx.player
+    proxy.getServer(limbo_server_name).getOrNull()?.let {
+        if (PluginConfigLoader.debug_earlydisconnect) {
+            joiner.disconnect(Component.text("limbo transfer"))
+            return
+        }
+        handlePlayerLimboTransfer(ctx, it, DISCONNECT_MESSAGE(form_url, discord_url), logger)
+    } ?: run {
+    ctx.result = ServerPreConnectEvent.ServerResult.denied()
+    joiner.disconnect(DISCONNECT_MESSAGE(form_url, discord_url))
+    }
+}
+
+class OnPlayerJoinEvent(val proxy: ProxyServer, val logger: Logger) {
+    
     @Subscribe(priority = 10)
     fun checkIfWhitelisted(ctx: ServerPreConnectEvent) {
         val joiner = ctx.player
         
         if (PluginConfigLoader.debug_autofail) {
-            handleUnverifiedPlayer(ctx, logger)
+            handleUnverifiedPlayer(ctx,proxy, logger)
             return
         }
         
@@ -79,7 +112,7 @@ class OnPlayerJoinEvent(val logger: Logger) {
                 return
             }
         } else {
-            handleUnverifiedPlayer(ctx, logger)
+            handleUnverifiedPlayer(ctx, proxy, logger)
             return
         }
     }
