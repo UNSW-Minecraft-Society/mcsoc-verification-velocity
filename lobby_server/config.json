@@ -1,0 +1,6 @@
+{
+  "SERVER_IP": "localhost",
+  "SERVER_PORT": 30000,
+  "MODE": "VELOCITY",
+  "SECRET": "12345"
+}
