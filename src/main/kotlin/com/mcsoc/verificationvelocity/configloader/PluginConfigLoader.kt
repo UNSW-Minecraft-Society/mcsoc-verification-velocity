@@ -25,8 +25,8 @@ private const val CONFIG_FILE_PATH = "config.toml"
 internal data class ConfigData(
     @SerialName("whitelist")
     val whitelist_data: WhitelistConfigData = WhitelistConfigData.getDefault(), 
-    @SerialName("disconnect")
-    val disconnect_message_data: DisconnectMessageConfigData = DisconnectMessageConfigData.getDefault(),
+    @SerialName("redirect")
+    val limbo_redirect_data: DisconnectMessageConfigData = DisconnectMessageConfigData.getDefault(),
     @SerialName("debug")
     val debug_data: DebugConfigData = DebugConfigData.getDefault()
 ) {
@@ -64,6 +64,7 @@ internal data class WhitelistConfigData(
 
 @Serializable
 internal data class DisconnectMessageConfigData(
+    val limbo_server: String = "limbo",
     val form_url: String = "forms.google.com/formurl",
     val discord_url: String = "discord.gg/yourinvite"
 ) {
@@ -96,9 +97,10 @@ object PluginConfigLoader {
     val api_key get() = whitelist_config.api_key
     val whitelisted_servers get() = whitelist_config.whitelisted_servers
     
-    private val disconnect_message_config get() = config.disconnect_message_data
-    val form_url get() = disconnect_message_config.form_url
-    val discord_url get() = disconnect_message_config.discord_url
+    private val redirect_config get() = config.limbo_redirect_data
+    val limbo_server get() = redirect_config.limbo_server
+    val form_url get() = redirect_config.form_url
+    val discord_url get() = redirect_config.discord_url
     
     
     private fun loadConfigData() {
